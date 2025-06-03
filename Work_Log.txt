@@ -1,0 +1,21 @@
+1) Reading the Task Document thoroughly, understanding and analyzing the requirements.
+2) Understanding entities provided, anaylzing the attributes which are already provided for the entities.
+3) Figuring out Primary key of each entity, and observing relations of entities with each other.
+4) Downloaded the Datasets, and starting analyzing the data to get clearer idea of the relations and entities.
+5) Started Identifying the relations of entities with each other, and documenting hem into Schema.docx 
+6) Identified Primary and Foreign Keys, relationships of entities with each other and documented them in Schema.docx
+7) Started setting up Flask with MySql 
+8) Creating 2 seperate directories named as "backend" and "frontend", to keep backend seperate from the frontend
+9) Now inside backend directory creating a virual enviroment to keep project's dependencies seperate from system-wide python, so that
+   our backend project can have its own pacakges and it also allows to prevent conflicts between projects, venv is created using command
+   "python -m venv venv".
+10) On Windows, use "venv\Scripts\activate"
+11) Installing Django's my sql client using "pip install django mysqlclient"
+12) Starting the Django Project named Techmart inside backend using "django-admin startproject Techmart"
+13) Now I am adding the installed dependecies in requirements.txt.
+14) Create a requirements.txt using "pip freeze > requirements.txt", this creates or overwrites the requirement.txt automatically,
+    adding the required python pacakges installed in current project enviroment (including versions) to requirements.txt
+14) now "deactivate" from the env so that we can push the current work in github, (I had created a repository beforehand)
+15) create a ".gitignore" so that venc, .env files, data, and similar files can be excluded from pushing into the git
+16) initialized git using "git init" and created a new branch named dev as "git checkout -b dev", then add by "git add ."
+
