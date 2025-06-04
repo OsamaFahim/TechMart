@@ -4,18 +4,99 @@
 4) Downloaded the Datasets, and starting analyzing the data to get clearer idea of the relations and entities.
 5) Started Identifying the relations of entities with each other, and documenting hem into Schema.docx 
 6) Identified Primary and Foreign Keys, relationships of entities with each other and documented them in Schema.docx
-7) Started setting up Flask with MySql 
-8) Creating 2 seperate directories named as "backend" and "frontend", to keep backend seperate from the frontend
-9) Now inside backend directory creating a virual enviroment to keep project's dependencies seperate from system-wide python, so that
+7) Creating 2 seperate directories named as "backend" and "frontend", to keep backend seperate from the frontend
+8) Now inside backend directory creating a virual enviroment to keep project's dependencies seperate from system-wide python, so that
    our backend project can have its own pacakges and it also allows to prevent conflicts between projects, venv is created using command
    "python -m venv venv".
-10) On Windows, use "venv\Scripts\activate"
-11) Installing Django's my sql client using "pip install django mysqlclient"
-12) Starting the Django Project named Techmart inside backend using "django-admin startproject Techmart"
-13) Now I am adding the installed dependecies in requirements.txt.
-14) Create a requirements.txt using "pip freeze > requirements.txt", this creates or overwrites the requirement.txt automatically,
+9)  On Windows, use "venv\Scripts\activate"
+10) Installing Django's my sql client using "pip install django mysqlclient", also do pip install pymysql to use sql
+11) Starting the Django Project named Techmart inside backend using "django-admin startproject Techmart"
+12) now go to command prompt and run "mysql -u root -p" -p flag asks password from the user, write your password to open MySQL command line interface,
+    and now create the database by "CREATE DATABASE techmart_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" (now ut-f 8 characters including emojis
+    and other special chacters), then create a new user who case use techmart_db with the command:
+    "CREATE USER 'techmart_user'@'localhost' IDENTIFIED BY 'PASSWORD';", change the password according to preference, then grant prvillages to this user with
+    "GRANT ALL PRIVILEGES ON techmart_db.* TO 'techmart_user'@'localhost';" and then apply the changes using "FLUSH PRIVILEGES". also see that that read_only 
+    is set to off so that we can also write to this database, Write "SHOW VARIABLES LIKE 'read_only';", if read_only is set to off (in my case it was already on)
+    then you do "SET GLOBAL read_only = OFF;", do get write access as well for the new user. and now configure this DB in Django in the backend codebase
+13) now in backend/Techmart/Techmart directory, go to settings.py, and find the json of Databases (in my case, started from line 76), and 
+    then set the enviroment variables for MySQL in following manner
+    //Set variables accoding to your enviroment
+    //NOTE: "I HAVE USED ENVIROMENT VARIABLES LATER ON FOR EASE OF USE, USE THAT FOR CONVENICNCE, RATHER THAN SETTING VARIABLES HERE"
+    DATABASES = {
+    	'default': {
+        	'ENGINE': 'django.db.backends.mysql',
+        	'NAME': 'techmart_db', //choose name according to your choice
+        	'USER': 'techmart_user', //write the name that 
+        	'PASSWORD': Enter you password here //
+        	'HOST': 'localhost', 
+        	'PORT': '3306',
+        	'OPTIONS': {
+            		'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        	},
+    	}
+    }
+Now mongodb runs perfectly locally, but towards the end of the project I would move to docerization if time limit is viable. But this technique is 
+enough to run MySQL locally, although it does require manual configuration
+14) Now I am adding the installed dependecies in requirements.txt.
+15) Create a requirements.txt using "pip freeze > requirements.txt", this creates or overwrites the requirement.txt automatically,
     adding the required python pacakges installed in current project enviroment (including versions) to requirements.txt
-14) now "deactivate" from the env so that we can push the current work in github, (I had created a repository beforehand)
-15) create a ".gitignore" so that venc, .env files, data, and similar files can be excluded from pushing into the git
-16) initialized git using "git init" and created a new branch named dev as "git checkout -b dev", then add by "git add ."
+16) now "deactivate" from the env so that we can push the current work in github, (I had created a repository beforehand)
+17) create a ".gitignore" so that venv, .env files, data, and similar files can be excluded from pushing into the git
+18) initialized git using "git init" and created a new branch named dev as "git checkout -b dev", then add by "git add .", commit, adding
+    remote URL origin and pushing to the "dev" branch in the origin URL on the remote.
+19) Now creating a new Django app which is named "core", and this is going to be a modular component where my models, views, etc are going
+    to be stored for modularity using the command "python manage.py startapp core"
+20) the in techmart/techmart/setting.py register this in INSTALLED_APPS wiht 'core'
+21) Make classes for the entities provided, and currently I am only setting the foreign keys of all the tables, beacuase the other 
+    attributes would be set up after loading the data from csv, so first make a migrations using " python manage.py makemigrations",
+    now the schema has been set up and models have been created and migration has been set up.
+22) Applying the migration to the database using "python manage.py migrate"
+23) Creating directory management/commands/ because Django automatically discovers management commands by looking inside each apps
+    "management/commands/" folder, basically the django.core.management is Django's internal system that looks for management commands,
+     so it will find load command in core/management/commands/load.py and then execute the code inside it.
+24) Implementing Load.py file so that data can be correctly loaded and columns can be dynamically loaded into the models. But this with this
+    approach i ran into a problem as i got an error message like "In customers cannot find Name, email, etc ... ", and upon my research i found
+    out that we have to define the attributes of our models first.
+25) so after that I reimplemented the models.py where i understood all the columns of respective datatypes, analyzed the approximate size and 
+    datatypes of the attributes.
+26) So after setting the models, go to backend/Techmart and run "python manage.py makemigrations", to prepare migration files and detect the
+    changes in schema, after that applying those migrations using "python manage.py migrate"
+27) I have made my load.py completely atomic, so that if We get any error none of the changes apply, and roll back is done so that their is no
+    foreign key constraint and duplication (although they are handled by Django, when we give cascading flags while defining attributes), but 
+    this atomicity is done for good practice and safety.
+28) the values who has a suffix of "_id" are considered Foreign keys, if they are also found in foreign key in the models of Django, because there 
+    were some similar attributes eg "session_id", which wouldh have caused issues, in this way robustness is ensured.
+29) after trying to run load.py, i got an error "Certification in Customer cannot be null", so upon further inspection of the csv files i realized
+    that some values were empty or left blank, for eg phone in customers, warranty_months, they have been commented in models.py for reference.
+    These values are allowed null values and alos blank = True for them (blank allows form to left these values empty, multiple migrations are done 
+    in attempt to cater similar null value errors
+    because initially null was not allowed for any value for rebustness and then I fixed the errors incrementally. timestamps were giving errros
+    due to 
+30) Timestamps in the CSV files were in multiple formats, so we parsed and normalized them into a consistent timezone-aware datetime format
+     before storing them in the database. for eg "2025-05-14T18:44:04.302639" and "5/5/2025  8:16:30 AM" were obvserved in the csv, 
+31) After creating the databses and filling the data, test them using manage.py shell using "python manage.py shell", and then you can check for
+    tables in this way: you can check suppliers and other data as well, and match some of the data with respective csvs, this will ensure that 
+    everything has been done correctly till now. 
+    first give import command using "from core.models import Supplier, Product, Customer, Transaction"
+    now run all these code blocks one by one, and the data will be printed and you double check it using code blocks below
+    # Suppliers
+    print("Suppliers:")
+    for s in Supplier.objects.all():
+       print(s.id, s.name)
+    # Customers
+    print("\nCustomers:")
+    for c in Customer.objects.all():
+        print(f"{c.id} | {c.first_name} {c.last_name} | Email: {c.email} | Tier: {c.loyalty_tier}")
+    # Transactions
+	print("\nTransactions:")
+	for t in Transaction.objects.all():
+    		print(f"{t.id} | Customer: {t.customer.id} | Product: {t.product.id} | Time: {t.timestamp}")
+32) Now as I have added personal credentals in settings.py, the practice is to create a .env put credentials there
+    use .env variables in settings.py and also create .env.example for user reference. This secures personal 
+    credentials. now changing Techmart/settings.py to use the enviroment variables using "python-dotenv" library 
+    to load the env variables from the library. Install the library using "pip install python-dotenv" if required.
+33)  It is time to commit and push changes into the new . to save changes that have been done till now.
+
+
+
 
