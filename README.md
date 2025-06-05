@@ -80,6 +80,7 @@ The server is now ready to accept connections on port 6379
 
 - Make sure you have MySQL running and a database created.
 - Update your database credentials in `backend/Techmart/Techmart/settings.py` or set the appropriate environment variables.
+- It is Recommended to use .env (.env.example) is given as well, instead of hardcoding the variables in settings.py
 - Run migrations:
 
 ```sh
