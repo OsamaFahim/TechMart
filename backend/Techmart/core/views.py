@@ -112,7 +112,10 @@ def suspicious_transactions(request):
     data = cache.get(cache_key)
     if data:
         return Response(data)
-    suspicious = Transaction.objects.filter(
+    # Use select_related to fetch related customer in one DB hit (optimization)
+    #It is a method in Django ORM that is used to optimze database queries by eprforming 
+    #SQL join and retriving related objects in a single query instead of multiple queries
+    suspicious = Transaction.objects.select_related('customer').filter(
         Q(total_amount__gt=5000) | Q(total_amount__lt=1) |
         Q(timestamp__gte=timezone.now()-timedelta(minutes=1))
     )
@@ -128,7 +131,8 @@ def low_stock_products(request):
     data = cache.get(cache_key)
     if data:
         return Response(data)
-    products = Product.objects.filter(stock_quantity__lt=threshold)
+    # Use only() to fetch only needed fields (optimization)
+    products = Product.objects.only('id', 'name', 'stock_quantity').filter(stock_quantity__lt=threshold)
     serializer = ProductSerializer(products, many=True)
     cache.set(cache_key, serializer.data, timeout=60)
     return Response(serializer.data)
