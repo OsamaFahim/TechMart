@@ -74,6 +74,17 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only!
 
 ROOT_URLCONF = 'Techmart.urls'
 
+#Implementing caching layer (Redis) for frequently accessed data
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1", #For localhost
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

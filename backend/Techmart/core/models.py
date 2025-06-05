@@ -36,6 +36,14 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        #Creating indexes on caetrogry and supplier, as they have been used by our queries in
+        #views.py
+        indexes = [
+            models.Index(fields=['category']),
+            models.Index(fields=['supplier']),
+        ]
 
 class Customer(models.Model):
     email = models.EmailField()
@@ -72,3 +80,11 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"Transaction #{self.id} - {self.customer}"
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['timestamp']),
+            models.Index(fields=['customer']),
+            models.Index(fields=['product']),
+            models.Index(fields=['total_amount']),
+        ]
