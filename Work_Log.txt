@@ -95,8 +95,40 @@ enough to run MySQL locally, although it does require manual configuration
     use .env variables in settings.py and also create .env.example for user reference. This secures personal 
     credentials. now changing Techmart/settings.py to use the enviroment variables using "python-dotenv" library 
     to load the env variables from the library. Install the library using "pip install python-dotenv" if required.
-33)  It is time to commit and push changes into the new . to save changes that have been done till now.
-
-
-
-
+33)  It is time to commit and push changes into the new  Database/Data-Loading-branch. to save changes that have been done till now. and create a pul request 
+34) now to create rest apis i am using Django REST framework (DRF), it will add rest_framework to our INSTALLED_APPS, our app is core.
+35) Create a Serializer File in Backend/Techmart/Core and make 4 serializers to serialize the data so that we return it in json to the frontend
+    using fields = '__all__' just includes all fields from the model in the serializer, and serializer would be like fields = ['id', 'name', 'price' etc]
+36) Writing API endpoints in backend/Techmart/core/views.py, Writing GET and POST commands and implemneting them and returning the responses after applying logic on
+    the request data after serializing them if required, and also handling business logic in this file, for eg reasonable amount validation, otherwise we throw a bad
+    request error with HTTP status code 400 and also checking for insufficient stock and applying other mentioned logic as well
+37) Add a file urls.py in core where we define URL patterns specific to the app, and call specific views relating to the provided URL, it is like our app's own internal
+    routing table, it maps local routes to their corresponding view functions
+38) Now include these URLS in Techmart/urls.py, using inclue library so that our Techmart projects use our app's (core) URLS.
+39) Now run the server using "python manage.py runserver", and go to the URL provided by the server and go to some api endpoints like "http://127.0.0.1:8000/api/dashboard/overview",
+    "http://127.0.0.1:8000/api/inventory/low-stock", to check whether the backend is running fine
+40) Add, commit these changes to Git before moving forward
+41) now go to root directory and run the command "npm create vite@latest frontend -- --template react-ts" and this will prompt for the frameworl, i choose react and then typescript.
+42) now follow the commands shown on the terminal like cd frontend, npm install and then npm run dev
+43) Installed Material-UI and related libraries for UI components and DataGrid:
+    npm install @mui/material @emotion/react @emotion/styled @mui/x-data-grid recharts
+44) Set up the main dashboard layout in Dashboard.tsx using MUI’s Grid and Container for a responsive structure.
+45) Created a Header component to display summary metrics fetched from the backend.
+46) Built a DashboardFilters component to allow users to select date range, category, and segment, updating the filters state.
+47) Developed the SalesChart component using Recharts to visualize sales data, updating on filter change.
+48) Implemented LowStockProductsWidget to display low stock products in a DataGrid, with search and CSV export.
+51) Built TransactionsFeed to show suspicious transactions in a DataGrid, with search and a modal for transaction details.
+52) Created TransactionModal to display detailed transaction info in a dialog when a row is clicked.
+53) Fixed TypeScript errors by defining explicit row types for DataGrid and ensuring all props and API data are correctly typed.
+54) Added loading and error states to widgets using MUI CircularProgress and Alert for better user feedback.
+55) Implemented AlertsContext and GlobalSnackbar to show notifications for errors and important actions across the app.
+56) Organized API calls into separate files for maintainability and reusability.
+57) Ensured all components are modular and reusable by passing filters and data as props, and using context for shared state.
+58) Maintained a responsive layout using MUI Grid breakpoints for usability on all devices.
+59) CSV export are done for the Low Stock Products table, allowing users to download all filtered products with their name, stock, and status.
+60) Creating a post command (I forgot to do earlier), and checking in the databse using python manage.py shell method as mentioned in point 31, and then seeing the 
+    updated change in the database indicates correct transaction, other enpoints were somehow checked using the frontend calls after displaying in the frontend
+    but this api call was not in the dashboard, so this has to be tested out seperately. 
+61) Added the top products view and its url pattern in respective backend files, and updated the dashboard as well
+62) Adjusted the UI a little bit in Dashboard.tsx
+63) Now, push this work in the dev branch before continuing

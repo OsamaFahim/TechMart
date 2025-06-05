@@ -1,0 +1,11 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+}
+.title {
+  flex: 1;
+}
+.metrics {
+  display: flex;
+  gap: 2rem;
+}
