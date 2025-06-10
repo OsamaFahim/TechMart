@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, TextField, MenuItem, Button } from "@mui/material";
+import { fetchCategories, fetchSegments } from "../../api/products";
 
 // DashboardFilters Component
 
@@ -7,11 +8,12 @@ type Props = {
   onFilter: (filters: { dateFrom: string; dateTo: string; category: string; segment: string }) => void;
 };
 
+//REMOVE HARDODED CATEGORIES AND SEGMENTS and fetch them from API
 // Predefined categories and segments for filtering
-const categories = ["All", "Electronics", "Clothing", "Books"];
+//const categories = ["All", "Electronics", "Clothing", "Books"];
 // Predefined customer segments for filtering
 // I will adjust it later to send an api call to first fetch the categories and segments
-const segments = ["All", "Retail", "Wholesale"];
+//const segments = ["All", "Retail", "Wholesale"];
 
 // DashboardFilters component
 // Provides date range, category, and segment filters for the dashboard
@@ -20,6 +22,20 @@ const DashboardFilters: React.FC<Props> = ({ onFilter }) => {
   const [dateTo, setDateTo] = useState("");
   const [category, setCategory] = useState("All");
   const [segment, setSegment] = useState("All");
+  // State for categories and segments, initialized with "All"
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [segments, setSegments] = useState<string[]>(["All"]);
+
+  // Fetch categories and segments from the backend API on mount
+  useEffect(() => {
+    fetchCategories().then((cats) => {
+      // Only add if there are categories in the DB
+      setCategories(["All", ...cats.filter((c: string) => !!c)]);
+    });
+    fetchSegments().then((segs) => {
+      setSegments(["All", ...segs.filter((s: string) => !!s)]);
+    });
+  }, []);
 
   const handleApply = () => {
     onFilter({ dateFrom, dateTo, category, segment });

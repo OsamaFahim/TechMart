@@ -1,6 +1,7 @@
 #from django.shortcuts import render
 
 # Create your views here.
+from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction  # TO make create transaction function atomic
 from django.core.cache import cache
 from rest_framework.decorators import api_view
@@ -13,6 +14,7 @@ from .serializers import TransactionSerializer, ProductSerializer
 from datetime import timedelta
 from django.utils.dateparse import parse_date
 from decimal import Decimal
+import json
 
 # Helper: Calculate risk score 
 def calculate_risk_score(customer):
@@ -59,19 +61,34 @@ def dashboard_overview(request):
 # 2. Create Transaction
 @api_view(['POST'])
 def create_transaction(request):
+    #print("DEBUG: create_transaction CALLED")
     from decimal import Decimal, InvalidOperation
 
     try:
+        #print("DEBUG: Received POST data:", request.data)
+        # Fix for DRF browsable API sending _content as a string
+        # --- DRF Browsable API Fix ---
+        # If the browsable API sends the payload as a string in '_content', parse it as JSON.
+        # This allows the endpoint to work with both the browsable API and real API clients.
+        data = request.data
+        if '_content' in data:
+            try:
+                data = json.loads(data['_content'])
+            except Exception as e:
+                return Response({"error": "Invalid JSON format."}, status=status.HTTP_400_BAD_REQUEST)
+        #print("PARSED DATA:", data)
         with transaction.atomic():
-            data = request.data
+            # Parse and validate the amount
             try:
                 amount = Decimal(str(data.get('total_amount', "0")))
             except (InvalidOperation, TypeError):
                 return Response({"error": "Invalid total_amount format."}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Business rule: Amount must be between $0.01 and $10,000
             if not (Decimal("0.01") <= amount <= Decimal("10000")):
                 return Response({"error": "Amount must be between $0.01 and $10,000."}, status=status.HTTP_400_BAD_REQUEST)
             
+            # Fetch product and validate quantity
             product = Product.objects.get(id=data['product'])
             try:
                 quantity = int(data['quantity'])
@@ -81,11 +98,14 @@ def create_transaction(request):
             if product.stock_quantity < quantity:
                 return Response({"error": "Insufficient stock."}, status=status.HTTP_400_BAD_REQUEST)
             
+            # Serialize and save the transaction
             serializer = TransactionSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
+                # Update product stock
                 product.stock_quantity -= quantity
                 product.save()
+                # Update customer risk score
                 customer = Customer.objects.get(id=data['customer'])
                 customer.risk_score = calculate_risk_score(customer)
                 customer.save()
@@ -103,7 +123,7 @@ def create_transaction(request):
         return Response({"error": "Customer not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
 # 3. Suspicious Transactions
 @api_view(['GET'])
 def suspicious_transactions(request):
@@ -196,6 +216,26 @@ def top_products(request):
         result.append(prod)
     cache.set(cache_key, result, timeout=60)
     return Response(result)
+
+#These are the endpoints to fetch cateogries and customer segments, so that we fetch correct data
+#from the db instead of hard coded one and then use these in frontend 
+#7. endpoint to fetch categories
+@api_view(['GET'])
+def product_categories(request):
+    """
+    Returns a list of unique product categories.
+    """
+    categories = Product.objects.values_list('category', flat=True).distinct()
+    return Response(sorted(categories))
+
+#8. endpoint to fetch customer segments
+@api_view(['GET'])
+def customer_segments(request):
+    """
+    Returns a list of unique customer segments (loyalty_tier).
+    """
+    segments = Customer.objects.values_list('loyalty_tier', flat=True).distinct()
+    return Response(sorted(segments))
 
 #Previous endpoint, it was grouping by hour and not the day, it was always showing zero so 
 #i created a new endpoint which takes date ranges as parameters

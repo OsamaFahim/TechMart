@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}   # DB name from .env
+      MYSQL_USER: ${MYSQL_USER}           # DB user from .env
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}   # DB user password from .env
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Root password from .env
+    ports:
+      - "3307:3306" # changing to 3307 from 3306 to avoid conflict with local MySQL
+    volumes:
+      - db_data:/var/lib/mysql            # Persist MySQL data
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"                       # Expose Redis for debugging
+
+  backend:
+    build: ./backend                      # Build backend from ./backend directory
+    working_dir: /app/Techmart            # Set working directory inside container
+    command: ./entrypoint.sh              # Entrypoint script for backend
+    # For production, do NOT mount code as a volume to avoid code sync issues.
+    # For development, uncomment the next two lines to enable live code reload:
+    # volumes:
+    #   - ./backend:/app
+    ports:
+      - "8000:8000"                       # Expose Django backend
+    depends_on:
+      - db                                # Wait for db to be ready
+      - redis                             # Wait for redis to be ready
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+
+  frontend:
+    build: ./frontend                     # Build frontend from ./frontend directory
+    ports:
+      - "5173:80"                         # Expose frontend (Vite/React)
+    depends_on:
+      - backend                           # Wait for backend to be ready
+
+volumes:
+  db_data:                                # Named volume for MySQL persistence

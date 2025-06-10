@@ -62,6 +62,8 @@ class Customer(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+#In the transactions table, everything is a must and no column is emoty, it is the table with
+#most number of rows
 class Transaction(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

@@ -11,3 +11,15 @@ export const fetchTopProducts = async () => {
   const res = await axios.get(`${API_BASE}/analytics/top-products`);
   return res.data;
 };
+
+// Fetch products by category
+export const fetchCategories = async () => {
+  const res = await axios.get(`${API_BASE}/categories`);
+  return res.data;
+};
+
+// Fetch products by segment
+export const fetchSegments = async () => {
+  const res = await axios.get(`${API_BASE}/segments`);
+  return res.data;
+};
