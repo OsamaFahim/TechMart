@@ -1,6 +1,7 @@
 # TechMart
 
 A full-stack inventory, sales, and analytics dashboard built with Django (backend) and React (frontend).
+
 **Note: All Documents are Present inside Documents Folder for this branch**
 
 ---
