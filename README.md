@@ -2,7 +2,7 @@
 
 A full-stack inventory, sales, and analytics dashboard built with Django (backend) and React (frontend).
 
-**Note: All Documents are Present inside Documents Folder for this branch**
+**Note: All documents for this branch are located in the Documents folder. Since they are tracked using Git LFS, please use “View Raw” or “Download” to access them properly.**
 
 ---
 
